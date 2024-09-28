@@ -51,6 +51,7 @@ public class PluginBootstrap {
         AgentClassLoader.initDefaultLoader();
 
         PluginResourcesResolver resolver = new PluginResourcesResolver();
+        //  skywalking-plugin.def 获取plugin路径
         List<URL> resources = resolver.getResources();
 
         if (resources == null || resources.size() == 0) {
@@ -72,6 +73,7 @@ public class PluginBootstrap {
         for (PluginDefine pluginDefine : pluginClassList) {
             try {
                 LOGGER.debug("loading plugin class {}.", pluginDefine.getDefineClass());
+                // 加载插件 loadClass by AgentClassLoader
                 AbstractClassEnhancePluginDefine plugin = (AbstractClassEnhancePluginDefine) Class.forName(pluginDefine.getDefineClass(), true, AgentClassLoader
                     .getDefault()).newInstance();
                 plugin.setPluginName(pluginDefine.getName());
@@ -81,6 +83,7 @@ public class PluginBootstrap {
             }
         }
 
+        // SPI机制注入plugins
         plugins.addAll(DynamicPluginLoader.INSTANCE.load(AgentClassLoader.getDefault()));
 
         return plugins;

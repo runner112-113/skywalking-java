@@ -49,6 +49,7 @@ public class ConfigInitializer {
     private static void initNextLevel(Properties properties, Class<?> recentConfigType,
                                       ConfigDesc parentDesc) throws IllegalArgumentException, IllegalAccessException {
         for (Field field : recentConfigType.getFields()) {
+            // 处理public static 的属性
             if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers())) {
                 String configKey = (parentDesc + "." + field.getName()).toLowerCase();
                 Class<?> type = field.getType();

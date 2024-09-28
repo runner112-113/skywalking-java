@@ -53,6 +53,8 @@ public class SnifferConfigInitializer {
     private static final String SPECIFIED_CONFIG_PATH = "skywalking_config";
     private static final String DEFAULT_CONFIG_FILE_NAME = "/config/agent.config";
     private static final String ENV_KEY_PREFIX = "skywalking.";
+
+    // agent.config信息
     private static Properties AGENT_SETTINGS;
     private static boolean IS_INIT_COMPLETED = false;
 
@@ -69,6 +71,7 @@ public class SnifferConfigInitializer {
      */
     public static void initializeCoreConfig(String agentOptions) {
         AGENT_SETTINGS = new Properties();
+        // 加载agent config
         try (final InputStreamReader configFileStream = loadConfig()) {
             AGENT_SETTINGS.load(configFileStream);
             for (String key : AGENT_SETTINGS.stringPropertyNames()) {
@@ -81,11 +84,13 @@ public class SnifferConfigInitializer {
         }
 
         try {
+            // 加载系统变量来覆盖agent config,但必须以skywalking.开头
             overrideConfigBySystemProp();
         } catch (Exception e) {
             LOGGER.error(e, "Failed to read the system properties.");
         }
 
+        // 处理命令行参数，override agent config
         agentOptions = StringUtil.trim(agentOptions, ',');
         if (!StringUtil.isEmpty(agentOptions)) {
             try {
@@ -105,6 +110,7 @@ public class SnifferConfigInitializer {
 
         setAgentVersion();
 
+        // 判断agent.service_name
         if (StringUtil.isEmpty(Config.Agent.SERVICE_NAME)) {
             throw new ExceptionInInitializerError("`agent.service_name` is missing.");
         } else {
@@ -214,6 +220,7 @@ public class SnifferConfigInitializer {
      */
     private static void setAgentVersion() {
         try {
+            // 从文件清单信息(MANIFEST.MF)中获取Implementation-Version
             Enumeration<URL> resources = SnifferConfigInitializer.class.getClassLoader().getResources(JarFile.MANIFEST_NAME);
             while (resources.hasMoreElements()) {
                 URL url = resources.nextElement();
