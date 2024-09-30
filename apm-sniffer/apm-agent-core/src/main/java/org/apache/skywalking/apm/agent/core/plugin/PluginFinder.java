@@ -47,12 +47,14 @@ public class PluginFinder {
 
     public PluginFinder(List<AbstractClassEnhancePluginDefine> plugins) {
         for (AbstractClassEnhancePluginDefine plugin : plugins) {
+            // 增强的class
             ClassMatch match = plugin.enhanceClass();
 
             if (match == null) {
                 continue;
             }
 
+            // explicit class name
             if (match instanceof NameMatch) {
                 NameMatch nameMatch = (NameMatch) match;
                 LinkedList<AbstractClassEnhancePluginDefine> pluginDefines = nameMatchDefine.get(nameMatch.getClassName());
@@ -65,12 +67,14 @@ public class PluginFinder {
                 signatureMatchDefine.add(plugin);
             }
 
+            // bootstrap
             if (plugin.isBootstrapInstrumentation()) {
                 bootstrapClassMatchDefine.add(plugin);
             }
         }
     }
 
+    // 寻找匹配的插件
     public List<AbstractClassEnhancePluginDefine> find(TypeDescription typeDescription) {
         List<AbstractClassEnhancePluginDefine> matchedPlugins = new LinkedList<AbstractClassEnhancePluginDefine>();
         String typeName = typeDescription.getTypeName();

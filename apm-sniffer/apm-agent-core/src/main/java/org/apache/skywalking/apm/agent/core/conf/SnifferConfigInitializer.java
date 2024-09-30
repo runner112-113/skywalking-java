@@ -85,12 +85,14 @@ public class SnifferConfigInitializer {
 
         try {
             // 加载系统变量来覆盖agent config,但必须以skywalking.开头
+            // -javaagent:/path/skywalking-agent.jar -Dskywalking.[option1]=[value2] -D的参数
             overrideConfigBySystemProp();
         } catch (Exception e) {
             LOGGER.error(e, "Failed to read the system properties.");
         }
 
         // 处理命令行参数，override agent config
+        // -javaagent:/path/skywalking-agent.jar={config1}={value1},{config2}={value2} 方式启动
         agentOptions = StringUtil.trim(agentOptions, ',');
         if (!StringUtil.isEmpty(agentOptions)) {
             try {
@@ -108,6 +110,7 @@ public class SnifferConfigInitializer {
         configureLogger();
         LOGGER = LogManager.getLogger(SnifferConfigInitializer.class);
 
+        // set agent version find Implementation-Version in MANIFEST.MF
         setAgentVersion();
 
         // 判断agent.service_name
@@ -137,6 +140,11 @@ public class SnifferConfigInitializer {
         IS_INIT_COMPLETED = true;
     }
 
+    public static void main(String[] args) {
+        Class<?>[] classes = Config.class.getClasses();
+        System.out.println();
+    }
+
     /**
      * Initialize field values of any given config class.
      *
@@ -148,6 +156,7 @@ public class SnifferConfigInitializer {
             return;
         }
         try {
+            // 将agent config apply Config static field
             ConfigInitializer.initialize(AGENT_SETTINGS, configClass);
         } catch (IllegalAccessException e) {
             LOGGER.error(e,

@@ -63,7 +63,9 @@ public abstract class AbstractClassEnhancePluginDefine {
      */
     public DynamicType.Builder<?> define(TypeDescription typeDescription, DynamicType.Builder<?> builder,
         ClassLoader classLoader, EnhanceContext context) throws PluginException {
+        // 当前插件的全类名
         String interceptorDefineClassName = this.getClass().getName();
+        // 当前被拦截到的类的全类名
         String transformClassName = typeDescription.getTypeName();
         if (StringUtil.isEmpty(transformClassName)) {
             LOGGER.warn("classname of being intercepted is not defined by {}.", interceptorDefineClassName);
@@ -71,10 +73,12 @@ public abstract class AbstractClassEnhancePluginDefine {
         }
 
         LOGGER.debug("prepare to enhance class {} by {}.", transformClassName, interceptorDefineClassName);
+        // witness机制校验当前插件是否可用
         WitnessFinder finder = WitnessFinder.INSTANCE;
         /**
          * find witness classes for enhance class
          */
+        // 在指定类加载器下查找指定的类，如果有多个类则必须同时存在
         String[] witnessClasses = witnessClasses();
         if (witnessClasses != null) {
             for (String witnessClass : witnessClasses) {
@@ -84,6 +88,7 @@ public abstract class AbstractClassEnhancePluginDefine {
                 }
             }
         }
+        // 在指定类加载器下查找指定的方法，如果有多个方法则必须同时存在
         List<WitnessMethod> witnessMethods = witnessMethods();
         if (!CollectionUtil.isEmpty(witnessMethods)) {
             for (WitnessMethod witnessMethod : witnessMethods) {
@@ -97,8 +102,10 @@ public abstract class AbstractClassEnhancePluginDefine {
         /**
          * find origin class source code for interceptor
          */
+        // 字节码增强
         DynamicType.Builder<?> newClassBuilder = this.enhance(typeDescription, builder, classLoader, context);
 
+        // 将记录状态的上下文EnhanceContext设置为已增强
         context.initializationStageCompleted();
         LOGGER.debug("enhance class {} by {} completely.", transformClassName, interceptorDefineClassName);
 
@@ -114,8 +121,10 @@ public abstract class AbstractClassEnhancePluginDefine {
      */
     protected DynamicType.Builder<?> enhance(TypeDescription typeDescription, DynamicType.Builder<?> newClassBuilder,
                                              ClassLoader classLoader, EnhanceContext context) throws PluginException {
+        // 静态方法插桩
         newClassBuilder = this.enhanceClass(typeDescription, newClassBuilder, classLoader);
 
+        // 构造器和实例方法插桩
         newClassBuilder = this.enhanceInstance(typeDescription, newClassBuilder, classLoader, context);
 
         return newClassBuilder;

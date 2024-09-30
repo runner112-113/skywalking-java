@@ -91,6 +91,7 @@ public class AgentClassLoader extends ClassLoader {
 
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
+        // 在classpath下查找
         List<Jar> allJars = getAllJars();
         String path = name.replace('.', '/').concat(".class");
         for (Jar jar : allJars) {

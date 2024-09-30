@@ -44,6 +44,9 @@ import static org.apache.skywalking.apm.agent.core.conf.Config.Buffer.BUFFER_SIZ
 import static org.apache.skywalking.apm.agent.core.conf.Config.Buffer.CHANNEL_SIZE;
 import static org.apache.skywalking.apm.agent.core.remote.GRPCChannelStatus.CONNECTED;
 
+/**
+ * TraceSegmentServiceClient 负责将 TraceSegment 异步发送到 Collector
+ */
 @DefaultImplementor
 public class TraceSegmentServiceClient implements BootService, IConsumer<TraceSegment>, TracingContextListener, GRPCChannelListener {
     private static final ILog LOGGER = LogManager.getLogger(TraceSegmentServiceClient.class);
@@ -51,6 +54,7 @@ public class TraceSegmentServiceClient implements BootService, IConsumer<TraceSe
     private long lastLogTime;
     private long segmentUplinkedCounter;
     private long segmentAbandonedCounter;
+    // 内存队列，生产者消费者模型实现
     private volatile DataCarrier<TraceSegment> carrier;
     private volatile TraceSegmentReportServiceGrpc.TraceSegmentReportServiceStub serviceStub;
     private volatile GRPCChannelStatus status = GRPCChannelStatus.DISCONNECT;

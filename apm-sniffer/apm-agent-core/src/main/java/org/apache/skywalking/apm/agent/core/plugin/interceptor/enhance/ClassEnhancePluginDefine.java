@@ -62,6 +62,8 @@ public abstract class ClassEnhancePluginDefine extends AbstractClassEnhancePlugi
      * @param typeDescription target class description
      * @param newClassBuilder byte-buddy's builder to manipulate class bytecode.
      * @return new byte-buddy's builder for further manipulation.
+     *
+     * 模板方法
      */
     @Override
     protected DynamicType.Builder<?> enhanceInstance(TypeDescription typeDescription,
@@ -82,6 +84,7 @@ public abstract class ClassEnhancePluginDefine extends AbstractClassEnhancePlugi
 
         /**
          * nothing need to be enhanced in class instance, maybe need enhance static methods.
+         * 不需要增强
          */
         if (!existedConstructorInterceptPoint && !existedMethodsInterceptPoints) {
             return newClassBuilder;
@@ -179,6 +182,7 @@ public abstract class ClassEnhancePluginDefine extends AbstractClassEnhancePlugi
     @Override
     protected DynamicType.Builder<?> enhanceClass(TypeDescription typeDescription, DynamicType.Builder<?> newClassBuilder,
         ClassLoader classLoader) throws PluginException {
+        // 获取静态方法拦截点信息
         StaticMethodsInterceptPoint[] staticMethodsInterceptPoints = getStaticMethodsInterceptPoints();
         String enhanceOriginClassName = typeDescription.getTypeName();
         if (staticMethodsInterceptPoints == null || staticMethodsInterceptPoints.length == 0) {
@@ -186,12 +190,15 @@ public abstract class ClassEnhancePluginDefine extends AbstractClassEnhancePlugi
         }
         DelegateNamingResolver delegateNamingResolver = new DelegateNamingResolver(typeDescription.getTypeName(), this);
 
+        // 遍历静态方法拦截点
         for (StaticMethodsInterceptPoint staticMethodsInterceptPoint : staticMethodsInterceptPoints) {
+            // 拿到拦截器类全称
             String interceptor = staticMethodsInterceptPoint.getMethodsInterceptor();
             if (StringUtil.isEmpty(interceptor)) {
                 throw new EnhanceException("no StaticMethodsAroundInterceptor define to enhance class " + enhanceOriginClassName);
             }
 
+            // 是否重写入参
             if (staticMethodsInterceptPoint.isOverrideArgs()) {
                 if (isBootstrapInstrumentation()) {
                     newClassBuilder = newClassBuilder.method(isStatic().and(staticMethodsInterceptPoint.getMethodsMatcher()))

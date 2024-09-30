@@ -159,10 +159,12 @@ public class BootstrapInstrumentBoost {
     private static boolean prepareJREInstrumentation(PluginFinder pluginFinder,
         Map<String, byte[]> classesTypeMap) throws PluginException {
         TypePool typePool = TypePool.Default.of(BootstrapInstrumentBoost.class.getClassLoader());
+        // 处理BootstrapInstrumentation
         List<AbstractClassEnhancePluginDefine> bootstrapClassMatchDefines = pluginFinder.getBootstrapClassMatchDefine();
         for (AbstractClassEnhancePluginDefine define : bootstrapClassMatchDefines) {
             if (Objects.nonNull(define.getInstanceMethodsInterceptPoints())) {
                 for (InstanceMethodsInterceptPoint point : define.getInstanceMethodsInterceptPoints()) {
+                    // 是否重写参数
                     if (point.isOverrideArgs()) {
                         generateDelegator(
                             classesTypeMap, typePool, define.getPluginName(),
